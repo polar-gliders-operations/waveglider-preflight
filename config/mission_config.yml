@@ -1,0 +1,409 @@
+# =============================================================================
+# Wave Glider Pre-mission / Dockside Preflight Configuration
+# =============================================================================
+
+mission:
+  name: "WHIRLS Mission 3 - Dockside testing"
+  platform: "Wave Glider"
+  data_path: "/Users/xedhjo/Documents/Data/WHIRLS/WHIRLS Mission 3 - Dockside testing"
+  timezone: "UTC"
+  # Sanity bounds — any timestamp outside this window is a corrupt record
+  # Set conservatively around the deployment period
+  valid_data_range:
+    start: "2026-01-01"
+    end:   "2026-12-31"
+
+# -----------------------------------------------------------------------------
+# Test period — data outside this window is flagged and excluded
+# Times in the timezone declared under mission.timezone
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# Sessions — each gets its own diagnostic plots and summary
+# Dockside test sessions use CR6/ADCP data.
+# Deployment session covers continuous IMU/GPS data.
+# Add phases and events per session once tech reports are available.
+# -----------------------------------------------------------------------------
+sessions:
+
+  # --- Dockside test 1 (May 21) ---
+  - name: "Dockside test 1 — 2026-05-21"
+    start: "2026-05-21 11:30"
+    end:   "2026-05-21 15:15"
+    type:  "dockside"
+    phases: []
+    events: []
+
+  # --- Dockside test 2 (May 26) — main test with full tech report ---
+  - name: "Dockside test 2 — 2026-05-26"
+    start: "2026-05-26 07:45"
+    end:   "2026-05-26 14:30"
+    type:  "dockside"
+    phases:
+      - label: "indoors"
+        start: "08:00"
+        end:   "08:49"
+        color: "#cccccc"
+      - label: "outdoors"
+        start: "08:49"
+        end:   "12:22"
+        color: "#aed6f1"
+      - label: "shadow"
+        start: "12:22"
+        end:   "12:24"
+        color: "#85929e"
+      - label: "direct sun"
+        start: "12:24"
+        end:   "14:03"
+        color: "#f9e79f"
+      - label: "moving indoors"
+        start: "14:03"
+        end:   "14:14"
+        color: "#f0b27a"
+      - label: "indoors"
+        start: "14:14"
+        end:   "14:30"
+        color: "#cccccc"
+    events:
+      - time:  "08:25"
+        label: "SPN1, Gill, RBR, WXT ON (indoors)"
+        color: "green"
+        tags: ["sensor"]
+      - time:  "08:49"
+        label: "WG moved outdoors"
+        color: "green"
+        tags: ["location"]
+      - time:  "09:24"
+        label: "IMU sample rate → 50 ms"
+        color: "steelblue"
+        tags: ["imu"]
+      - time:  "12:22"
+        label: "shadow from building"
+        color: "orange"
+        tags: ["radiation"]
+      - time:  "12:24"
+        label: "direct sunlight"
+        color: "orange"
+        tags: ["radiation"]
+      - time:  "14:03"
+        label: "moving indoors"
+        color: "red"
+        tags: ["location"]
+      - time:  "14:14"
+        label: "WG indoors"
+        color: "red"
+        tags: ["location"]
+
+  # --- Deployment / continuous sensors (IMU, GPS) ---
+  - name: "Dockside test 3 — IMU/Waves"
+    start: "2026-05-27 23:59"
+    end:   "2026-06-01 12:00"
+    type:  "dockside_waves"
+
+    phases:
+      - label: "office"
+        start: "2026-05-28 00:00"
+        end:   "2026-05-28 11:30"
+        color: "#cccccc"
+      - label: "gantry door"
+        start: "2026-05-28 11:30"
+        end:   "2026-05-29 05:35"
+        color: "#aed6f1"
+      - label: "office"
+        start: "2026-05-29 05:35"
+        end:   "2026-06-01 05:51"
+        color: "#cccccc"
+      - label: "gantry door"
+        start: "2026-06-01 05:51"
+        end:   "2026-06-01 07:20"
+        color: "#aed6f1"
+      - label: "outside"
+        start: "2026-06-01 07:20"
+        end:   "2026-06-01 12:00"
+        color: "#f9e79f"
+
+    events:
+      - time:  "2026-05-28 09:24"
+        label: "IMU sample rate → 50 ms"
+        color: "steelblue"
+        tags:  ["imu"]
+      - time:  "2026-05-28 10:45"
+        label: "shake test (hoist)"
+        color: "orange"
+        tags:  ["motion"]
+      - time:  "2026-05-28 11:30"
+        label: "gantry door — sky view"
+        color: "green"
+        tags:  ["location"]
+      - time:  "2026-05-29 05:35"
+        label: "moved back to office"
+        color: "red"
+        tags:  ["location"]
+      - time:  "2026-06-01 05:51"
+        label: "gantry door — sky view"
+        color: "green"
+        tags:  ["location"]
+      - time:  "2026-06-01 07:20"
+        label: "taken outside"
+        color: "green"
+        tags:  ["location"]
+      - time:  "2026-06-01 09:49"
+        label: "GPSWaves restarted"
+        color: "red"
+        tags:  ["sensor"]
+
+# -----------------------------------------------------------------------------
+# Sensor toggles
+# -----------------------------------------------------------------------------
+sensors:
+  cr6:       true
+  adcp:      true
+  gpswaves:  true
+
+# -----------------------------------------------------------------------------
+# CR6 datalogger
+# -----------------------------------------------------------------------------
+cr6:
+  rbr:
+    enabled: true
+    label: "RBR CTD"
+    file_pattern: "PLD1_RBR*.dat"
+    expected_interval_s: 1.0
+    tolerance_s: 0.1
+    variables:
+      - RBR_Temp
+      - RBR_Salinity
+      - RBR_Pressure
+      - CODA_Temp
+      - CODA_Oxygen
+      - CODA_Phase
+      - Cyclops_Chlorophyll
+    range_checks:
+      RBR_Temp:            [5, 35]      # °C  — air temp range dockside
+      RBR_Salinity:        [0, 1]       # PSU — near zero on land, not seawater
+      RBR_Pressure:        [9, 12]      # dbar — atmospheric ~10.13 dbar
+      CODA_Temp:           [5, 35]      # °C
+      CODA_Oxygen:         [150, 280]   # µmol/L — ~210 expected in air at ~20°C
+      CODA_Phase:          [0, 60]      # degrees — instrument-specific, adjust if needed
+      Cyclops_Chlorophyll: [0, 20]      # µg/L — near zero in air
+    dockside_notes:
+      RBR_Salinity: "near-zero expected on land — not a fault"
+      CODA_Oxygen:  "should be ~100% air saturation (~210 µmol/L at 20°C)"
+
+  wxt:
+    enabled: true
+    label: "Vaisala WXT536"
+    file_pattern: "PLD1_WXT530*.dat"
+    expected_interval_s: 1.0
+    tolerance_s: 0.1
+    variables:
+      - wind_speed
+      - wind_direction
+      - atmospheric_temperature
+      - relative_humidity
+      - atmospheric_pressure
+      - rain_amount
+      - rain_duration
+      - rain_intensity
+      - rain_peak
+    range_checks:
+      wind_speed:             [0, 60]
+      wind_direction:         [0, 360]
+      atmospheric_temperature: [-10, 45]
+      relative_humidity:      [0, 100]
+      atmospheric_pressure:   [900, 1100]
+      rain_amount:            [0, 500]
+      rain_duration:          [0, 99999]
+      rain_intensity:         [0, 999]
+      rain_peak:              [0, 999]
+
+  gill:
+    enabled: true
+    label: "Gill Sonic Anemometer"
+    file_pattern: "PLD1_Gill*.dat"
+    expected_interval_s: 0.05         # 20 Hz
+    tolerance_s: 0.01
+    variables:
+      - Ux_gill
+      - Uy_gill
+      - Uz_gill
+      - Speed_sound
+      - Checksum_gill
+    range_checks:
+      Ux_gill:     [-60, 60]
+      Uy_gill:     [-60, 60]
+      Uz_gill:     [-20, 20]
+      Speed_sound: [283, 323]          # K — sonic virtual temp in Kelvin (~293K = 20°C)
+      Checksum_gill: [0, 0]            # should always be 0 — nonzero = corrupt record
+    derived:
+      T_acoustic:
+        formula: "sonic_temp_kelvin_to_celsius"  # T = Speed_sound - 273.15
+        source_column: Speed_sound
+        units: "°C"
+
+  spn1:
+    enabled: true
+    label: "SPN1 Pyranometer (shortwave)"
+    file_pattern: "PLD1_SPN1*.dat"
+    expected_interval_s: 30.0
+    tolerance_s: 2.0
+    variables:
+      - SPN1_Raw_Total
+      - SPN1_Raw_Diffuse
+    range_checks:
+      SPN1_Raw_Total:   [-50, 1400]   # mV — allow noise floor negatives
+      SPN1_Raw_Diffuse: [-50, 1400]
+
+  cgr4:
+    enabled: true
+    label: "CGR4 Pyrgeometer (longwave)"
+    file_pattern: "PLD1_CGR4*.dat"
+    expected_interval_s: 30.0
+    tolerance_s: 2.0
+    variables:
+      - CGR4_Raw_mVolt
+      - CGR4_Raw_Vtherm
+      - CGR4_Rad
+    range_checks:
+      CGR4_Raw_mVolt: [-5, 5]          # mV thermopile signal
+      CGR4_Raw_Vtherm: [0.3, 0.8]      # V body thermistor (~0.5V at 20°C)
+      CGR4_Rad:        [200, 600]      # W/m² computed longwave (on logger)
+    derived:
+      T_body:
+        formula: "cgr4_vtherm_to_temp"  # needs calibration coefficients
+        source_column: CGR4_Raw_Vtherm
+        units: "°C"
+        note: "requires calibration sheet sensitivity constant"
+
+  avg:
+    enabled: true
+    label: "AVG table (slow averages)"
+    file_pattern: "PLD1_AVG*.dat"
+    expected_interval_s: 60.0
+    tolerance_s: 5.0
+    variables: []
+    range_checks: {}
+
+# -----------------------------------------------------------------------------
+# ADCP
+# -----------------------------------------------------------------------------
+adcp:
+  enabled: true
+  label: "RDI WorkHorse 300 kHz ADCP"
+  file_pattern: "*.ENS"
+  expected_interval_s: 1.0
+  tolerance_s: 0.1
+  n_beams: 4
+  min_correlation: 64
+  min_percent_good: 50
+  velocity_range: [-3.0, 3.0]
+
+# -----------------------------------------------------------------------------
+# GPSWaves
+# -----------------------------------------------------------------------------
+gpswaves:
+  enabled: true
+  label: "GPSWaves / MicroStrain IMU"
+
+  wave_stats:
+    enabled: true
+    expected_interval_s: 1800   # 30-min bursts
+    tolerance_s: 120
+    expected_interval_min: 30
+    tolerance_min: 2
+    variables:
+      - Hs
+      - Tp
+      - Dp
+    range_checks:
+      Hs: [0, 20]
+      Tp: [1, 30]
+      Dp: [0, 360]
+
+  imu:
+    expected_interval_s: 0.05      # 20 Hz post-config-change
+    tolerance_s: 0.01
+    # Variable names as stored in imu.nc (from MIP decoder)
+    variables:
+      - accel_x                    # m/s²
+      - accel_y
+      - accel_z
+      - gyro_x                     # rad/s
+      - gyro_y
+      - gyro_z
+      - roll_deg                   # degrees
+      - pitch_deg
+      - yaw_deg
+      - stab_accel_x               # low-pass filtered accel (g)
+      - stab_accel_y
+      - stab_accel_z
+    range_checks:
+      accel_x:     [-20, 20]       # m/s²
+      accel_y:     [-20, 20]
+      accel_z:     [-20, 20]
+      gyro_x:      [-10, 10]       # rad/s (~573 deg/s max)
+      gyro_y:      [-10, 10]
+      gyro_z:      [-10, 10]
+      roll_deg:    [-180, 180]     # degrees
+      pitch_deg:   [-90, 90]
+      yaw_deg:     [-180, 180]
+
+  gps:
+    expected_interval_s: 0.25      # 4 Hz GPS fix rate
+    tolerance_s: 0.1
+    # Variable names as stored in gps.nc
+    variables:
+      - latitude
+      - longitude
+      - hacc                       # horizontal accuracy (m)
+      - num_sv                     # number of satellites
+      - fix_type                   # 0=no fix, 1=dead reckon, 2=2D, 3=3D, 4=GNSS+DR
+      - groundspeed                # m/s
+      - heading                    # degrees
+    range_checks:
+      latitude:    [-90, 90]
+      longitude:   [-180, 180]
+      hacc:        [0, 50]         # m — flag if >50m horizontal accuracy
+      num_sv:      [0, 50]         # checked in context of location phase — indoors < 4 is expected
+      fix_type:    [2, 7]          # 2=3D, 3=SBAS, 4=Diff, 5=Dead Reckon, 6=RTK Float, 7=RTK Fixed
+      groundspeed: [0, 10]         # m/s — dockside should be ~0
+
+# -----------------------------------------------------------------------------
+# Cross-sensor diagnostics
+# -----------------------------------------------------------------------------
+cross_sensor:
+  time_alignment:
+    enabled: true
+    reference_sensor: "rbr"
+    max_offset_s: 5.0
+
+  temperature_comparison:
+    enabled: true
+    # Sensors expected to agree (air temperature)
+    air_sensors:
+      - sensor: "gill"
+        variable: "T_acoustic"         # derived from Speed_sound
+        label: "Gill (acoustic)"
+      - sensor: "wxt"
+        variable: "atmospheric_temperature"
+        label: "WXT (air)"
+      - sensor: "cgr4"
+        variable: "T_body"             # derived from CGR4_Raw_Vtherm
+        label: "CGR4 (body)"
+    # Sensors expected to agree (water/surface temperature)
+    water_sensors:
+      - sensor: "rbr"
+        variable: "RBR_Temp"
+        label: "RBR (water)"
+      - sensor: "rbr"
+        variable: "CODA_Temp"
+        label: "CODA (water)"
+      - sensor: "adcp"
+        variable: "temperature"
+        label: "ADCP (water)"
+    max_air_disagreement_degc:   2.0   # flag if Gill vs WXT differ by more
+    max_water_disagreement_degc: 0.5   # flag if RBR vs CODA differ by more
+
+  gps_check:
+    enabled: true
+    expected_fix: true
+    max_position_jump_m: 100

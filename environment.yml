@@ -1,0 +1,14 @@
+name: waveglider-preflight
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - numpy
+  - pandas
+  - xarray
+  - matplotlib
+  - pyyaml
+  - netcdf4
+  - jupyterlab
+  - ipywidgets
