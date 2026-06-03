@@ -286,13 +286,25 @@ def _build_dataset(
     ncells     = fl_cfg['ncells']
     nbeams     = fl_cfg['nbeams']
 
+    # ENU data: the 4 velocity columns are East, North, Up, Error — not beam radials.
+    # Use a separate 'component' dimension so it's unambiguous. Correlation / echo /
+    # percent_good are always stored in beam coordinates regardless of EX setting.
+    is_enu = (coordinate_system == 'ENU')
+    vel_dim      = 'component' if is_enu else 'beam'
+    vel_longname = ('ADCP velocity (ENU — East/North/Up/Error)'
+                    if is_enu else
+                    f'ADCP velocity ({coordinate_system} coordinates)')
+    vel_comment  = ('East, North, Up, Error velocity components'
+                    if is_enu else
+                    f'Coordinate system: {coordinate_system}')
+
     ds = xr.Dataset(
         {
             'velocity': (
-                ['time', 'cell', 'beam'], data['vel'],
-                {'long_name': f'ADCP velocity ({coordinate_system} coordinates)',
+                ['time', 'cell', vel_dim], data['vel'],
+                {'long_name': vel_longname,
                  'units': 'mm s-1',
-                 'comment': f'Coordinate system: {coordinate_system}'}
+                 'comment': vel_comment}
             ),
             'correlation': (
                 ['time', 'cell', 'beam'], data['cor'],
@@ -340,7 +352,11 @@ def _build_dataset(
             'cell':    np.arange(ncells),
             'range':   (['cell'], bin_depths,
                         {'long_name': 'range from transducer', 'units': 'm'}),
-            'beam':    np.arange(1, nbeams + 1),
+            # 'beam' is always present (used by correlation / echo / percent_good).
+            # 'component' is added for ENU datasets to label the velocity dimension.
+            'beam':      np.arange(1, nbeams + 1),
+            **({'component': ['East', 'North', 'Up', 'Error']}
+               if is_enu else {}),
             'pg_type': np.arange(1, 5),
         },
         attrs={
