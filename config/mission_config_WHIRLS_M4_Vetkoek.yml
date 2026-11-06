@@ -39,7 +39,7 @@ sessions:
 sensors:
   cr6:       true
   adcp:      true
-  gpswaves:  true
+  gpswaves:  false
 
 # -----------------------------------------------------------------------------
 # CR6 datalogger
