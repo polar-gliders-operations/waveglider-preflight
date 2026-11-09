@@ -26,9 +26,25 @@ mission:
 sessions:
 
   # --- Deployment (July 3) ---
-  - name: "WHIRLS Mission 4 — 2026-07-01"
-    start: "2026-07-01 00:00"
-    end:   "2026-09-30 23:59"
+  - name: "WHIRLS: Mission 4.1"
+    start: "2026-07-01 13:44"
+    end:   "2026-07-09 16:00"
+    type:  "mission"
+    phases: []
+    events: []  
+    
+# --- Deployment (July 3) ---
+  - name: "WHIRLS: On deck"
+    start: "2026-07-09 16:00"
+    end:   "2026-07-17 09:16"
+    type:  "On-ship"
+    phases: []
+    events: []
+
+  # --- Deployment (July 3) ---
+  - name: "WHIRLS: Mission 4.2"
+    start: "2026-07-17 09:16"
+    end:   "2026-09-29 07:37"
     type:  "mission"
     phases: []
     events: []

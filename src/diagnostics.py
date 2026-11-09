@@ -24,6 +24,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.patches as mpatches
 from IPython.display import display, HTML
+import matplotlib.patheffects as pe
 
 
 STATUS_PASS = '✅'
@@ -654,7 +655,7 @@ def plot_data_coverage_sessions(
     import pandas as pd
     import numpy as np
 
-    fig, ax = plt.subplots(figsize=(14, max(3, len(streams) * 0.7)))
+    fig, ax = plt.subplots(figsize=(14, max(3, len(streams) * 0.7)), dpi=600)
     colors = plt.cm.tab10.colors
 
     yticks, ylabels = [], []
@@ -698,10 +699,15 @@ def plot_data_coverage_sessions(
     for j, s in enumerate(sessions):
         t0n = mdates.date2num(s['start'].to_pydatetime())
         t1n = mdates.date2num(s['end'].to_pydatetime())
-        ax.axvspan(t0n, t1n, alpha=0.08,
+        ax.axvspan(t0n, t1n, alpha=0.2,
                    color=session_colors[j % len(session_colors)])
-        ax.text(t0n, len(streams) - 0.1, f"  {s['name']}",
-                fontsize='small', va='top', color='#555555')
+        ax.text(t0n, 1.0, s['name'].replace(': ', ':\n'),
+                transform=ax.get_xaxis_transform(),
+                fontsize='small', va='bottom', 
+                # color=session_colors[j % len(session_colors)],
+                color="k",
+                fontweight='medium',)
+                # path_effects=[pe.withStroke(linewidth=0.5, foreground='black')])
 
     ax.set_yticks(yticks)
     ax.set_yticklabels(ylabels, fontsize='small')
@@ -711,6 +717,7 @@ def plot_data_coverage_sessions(
     ax.grid(True, axis='x', alpha=0.3)
     ax.set_title(title, fontsize='large', fontweight='medium')
     plt.tight_layout()
+    plt.savefig('diagnostics.png', dpi=600, bbox_inches='tight')
     plt.show()
 
 
